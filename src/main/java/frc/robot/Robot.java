@@ -5,10 +5,13 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PWMVictorSPX;
+import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+//import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 /**
  * This is a demo program showing the use of the RobotDrive class, specifically it contains the code
  * necessary to operate a robot with tank drive.
@@ -17,10 +20,24 @@ public class Robot extends TimedRobot {
   private DifferentialDrive m_myRobot;
   private Joystick m_leftStick;
   private Joystick m_rightStick;
+  private SpeedController m_LeftFrontMotor;
+  private SpeedController m_LeftRearMotor;
+  private SpeedController m_RightFrontMotor;
+  private SpeedController m_RightRearMotor;
+  private SpeedControllerGroup m_LeftMotor;
+  private SpeedControllerGroup m_RightMotor;
 
   @Override
   public void robotInit() {
-    m_myRobot = new DifferentialDrive(new PWMVictorSPX(0), new PWMVictorSPX(1));
+    m_LeftFrontMotor = new CANSparkMax(0, MotorType.kBrushless);
+    m_LeftRearMotor = new CANSparkMax(0, MotorType.kBrushless);
+    m_RightFrontMotor = new CANSparkMax(0, MotorType.kBrushless);
+    m_RightRearMotor = new CANSparkMax(0, MotorType.kBrushless);
+
+    m_LeftMotor = new SpeedControllerGroup(m_LeftFrontMotor, m_LeftRearMotor);
+    m_RightMotor = new SpeedControllerGroup(m_RightFrontMotor, m_RightRearMotor);
+
+    m_myRobot = new DifferentialDrive(m_LeftMotor, m_RightMotor);
     m_leftStick = new Joystick(0);
     m_rightStick = new Joystick(1);
   }
