@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.wpilibj.math.*;
 /**
  * This is a demo program showing the use of the RobotDrive class, specifically it contains the code
  * necessary to operate a robot with tank drive.
@@ -29,10 +30,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    m_LeftFrontMotor = new CANSparkMax(0, MotorType.kBrushless);
-    m_LeftRearMotor = new CANSparkMax(0, MotorType.kBrushless);
-    m_RightFrontMotor = new CANSparkMax(0, MotorType.kBrushless);
-    m_RightRearMotor = new CANSparkMax(0, MotorType.kBrushless);
+    m_LeftFrontMotor = new CANSparkMax(2, MotorType.kBrushless);
+    m_LeftRearMotor = new CANSparkMax(3, MotorType.kBrushless);
+    m_RightFrontMotor = new CANSparkMax(1, MotorType.kBrushless);
+    m_RightRearMotor = new CANSparkMax(4, MotorType.kBrushless);
 
     m_LeftMotor = new SpeedControllerGroup(m_LeftFrontMotor, m_LeftRearMotor);
     m_RightMotor = new SpeedControllerGroup(m_RightFrontMotor, m_RightRearMotor);
@@ -44,6 +45,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    m_myRobot.tankDrive(m_leftStick.getY(), m_rightStick.getY());
+    if(m_leftStick.getY() > 0.1 || m_leftStick.getY() < -0.1)
+    {
+      double factor = 0.75;
+      m_myRobot.tankDrive(-factor*m_leftStick.getY(),-factor* m_leftStick.getY());
+    }
+    else if(m_leftStick.getX()!=0)
+    {
+      double factor = 0.1;
+      m_myRobot.tankDrive(factor*m_leftStick.getX(), -factor*m_leftStick.getX());
+    }
   }
 }
