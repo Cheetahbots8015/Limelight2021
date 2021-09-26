@@ -38,6 +38,7 @@ public class Robot extends TimedRobot {
   private SpeedController m_upperwheel;
   private SpeedController m_lowerwheel;
   private TalonSRX m_intake;
+  private TalonSRX m_transporter;
   private SpeedController m_roller; 
   
 
@@ -52,7 +53,8 @@ public class Robot extends TimedRobot {
     m_lowerwheel = new CANSparkMax(6,MotorType.kBrushless);
 
     m_roller = new CANSparkMax(7,MotorType.kBrushless);
-    m_intake = new TalonSRX(15);
+    m_transporter =new TalonSRX(15);
+    m_intake = new TalonSRX(16);
 
     m_LeftMotor = new SpeedControllerGroup(m_LeftFrontMotor, m_LeftRearMotor);
     m_RightMotor = new SpeedControllerGroup(m_RightFrontMotor, m_RightRearMotor);
@@ -72,10 +74,10 @@ public class Robot extends TimedRobot {
       double factor = 0.75;
       m_myRobot.tankDrive(-factor*m_leftStick.getY(),-factor* m_leftStick.getY());
     }
-    else if(m_leftStick.getX()!=0)
+    else if(m_leftStick.getZ()!=0)
     {
-      double factor = 0.1;
-      m_myRobot.tankDrive(factor*m_leftStick.getX(), -factor*m_leftStick.getX());
+      double factor = 0.6;
+      m_myRobot.tankDrive(factor*m_leftStick.getZ(), -factor*m_leftStick.getZ());
     }
     if(m_leftStick.getRawButton(1))
     {
@@ -84,14 +86,26 @@ public class Robot extends TimedRobot {
     else{
       m_roller.set(0); 
     }
+
+    if(m_leftStick.getRawButton(3)){
+      m_intake.set(ControlMode.PercentOutput, 0.4);
+    }else if (m_leftStick.getRawButton(4)){
+      m_intake.set(ControlMode.PercentOutput, -0.4);
+    }else{
+      m_intake.set(ControlMode.PercentOutput, 0);
+    }
+
+
+
+
     if(m_leftStick.getRawButton(2))
     {
-      m_intake.set(ControlMode.PercentOutput, 0.5);
+      m_transporter.set(ControlMode.PercentOutput, 0.5);
       m_lowerwheel.set(-0.3);
       m_upperwheel.set(0.3);
     }
     else{
-      m_intake.set(ControlMode.PercentOutput, 0);
+      m_transporter.set(ControlMode.PercentOutput, 0);
       m_lowerwheel.set(0);
       m_upperwheel.set(0);
     }
