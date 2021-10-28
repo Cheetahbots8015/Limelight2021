@@ -78,14 +78,12 @@ public class Robot extends TimedRobot {
       /* overlapped actions */
   int _timeToPlayLoops = 0;
 
-      /* joystick vars */
-  Joystick _joy;
   int _lastButton = 0;
   int _lastPOV = 0;
   
   int getButton() {
     for (int i = 1; i < 9; ++i) {
-        if (_joy.getRawButton(i)) {
+        if (m_leftStick.getRawButton(i)) {
             return i;
         }
     }
@@ -203,11 +201,11 @@ public class Robot extends TimedRobot {
       m_upperwheel.set(0.3);
     }
     else{
-      m_transporter.set(ControlMode.PercentOutput, 0);
+      m_transporter.set(ControlMode.PercentOutput, 0); 
       m_lowerwheel.set(0);
       m_upperwheel.set(0);
     }
-    int currentPOV = _joy.getPOV();
+    int currentPOV = m_leftStick.getPOV();
 
       /* if song selection changed, auto-play it */
       if (_timeToPlayLoops > 0) {
