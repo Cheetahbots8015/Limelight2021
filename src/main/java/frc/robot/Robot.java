@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -51,10 +52,12 @@ public class Robot extends TimedRobot {
   private SpeedController m_roller; 
   private TalonSRX m_climber;
   private final Timer m_timer = new Timer();
+  private NetworkTable m_ntwktbl;
 
 
   @Override
   public void robotInit() {
+    m_ntwktbl = NetworkTableInstance.getDefault().getTable("limelight");
     m_LeftFrontMotor = new CANSparkMax(2, MotorType.kBrushless);
     m_LeftRearMotor = new CANSparkMax(3, MotorType.kBrushless);
     m_RightFrontMotor = new CANSparkMax(1, MotorType.kBrushless);
