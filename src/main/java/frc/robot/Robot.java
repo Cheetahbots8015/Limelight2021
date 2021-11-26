@@ -57,14 +57,11 @@ public class Robot extends TimedRobot {
   private double m_limelight_tx;
   private double m_limelight_ty;
   private double m_limelight_tz;
+  private Boolean m_debug = false;
 
   @Override
   public void robotInit() {
     m_ntwktbl = NetworkTableInstance.getDefault().getTable("limelight");
-   
-    
-
-
   }
   @Override
   public void teleopInit() {
@@ -74,7 +71,8 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void teleopPeriodic() {
-    if(m_timer.get() >= 2.0)
+    //This is debug mode.
+    if(m_debug && m_timer.get() >= 2.0)
     {
       m_limelight_target = m_ntwktbl.getEntry("tv").getDouble(0);
       m_limelight_tx = m_ntwktbl.getEntry("tx").getDouble(0);
