@@ -53,88 +53,46 @@ public class Robot extends TimedRobot {
   private TalonSRX m_climber;
   private final Timer m_timer = new Timer();
   private NetworkTable m_ntwktbl;
-
+  private double m_limelight_target;
+  private double m_limelight_tx;
+  private double m_limelight_ty;
+  private double m_limelight_tz;
 
   @Override
   public void robotInit() {
     m_ntwktbl = NetworkTableInstance.getDefault().getTable("limelight");
-    m_LeftFrontMotor = new CANSparkMax(2, MotorType.kBrushless);
-    m_LeftRearMotor = new CANSparkMax(3, MotorType.kBrushless);
-    m_RightFrontMotor = new CANSparkMax(1, MotorType.kBrushless);
-    m_RightRearMotor = new CANSparkMax(4, MotorType.kBrushless);
-
-    m_upperwheel = new CANSparkMax(5, MotorType.kBrushless);
-    m_lowerwheel = new CANSparkMax(6, MotorType.kBrushless);
-
-
-    m_roller = new CANSparkMax(7,MotorType.kBrushless);
-    m_transporter =new TalonSRX(15);
-    m_intake = new TalonSRX(16);
-
-    m_LeftMotor = new SpeedControllerGroup(m_LeftFrontMotor, m_LeftRearMotor);
-    m_RightMotor = new SpeedControllerGroup(m_RightFrontMotor, m_RightRearMotor);
-    m_climber = new TalonSRX(12);
-
-    m_myRobot = new DifferentialDrive(m_LeftMotor, m_RightMotor);
-
-
-    m_leftStick = new Joystick(0);
-    m_rightStick = new Joystick(1);
+   
     
 
 
   }
   @Override
   public void teleopInit() {
+    m_timer.reset();
+    m_timer.start();
 
   }
   @Override
   public void teleopPeriodic() {
-    if(m_leftStick.getY() > 0.1 || m_leftStick.getY() < -0.1)
+    if(m_timer.get() >= 2.0)
     {
-      double factor = 0.75;
-      m_myRobot.tankDrive(-factor*m_leftStick.getY(),-factor* m_leftStick.getY());
+      m_limelight_target = m_ntwktbl.getEntry("tv").getDouble(0);
+      m_limelight_tx = m_ntwktbl.getEntry("tx").getDouble(0);
+      m_limelight_ty = m_ntwktbl.getEntry("ty").getDouble(0);
+      m_limelight_tz = m_ntwktbl.getEntry("tz").getDouble(0);
+      System.out.print("limelight......."+"\n");
+      System.out.print(m_limelight_target);
+      System.out.print("\n");
+      System.out.print(m_limelight_tx);
+      System.out.print("\n");
+      System.out.print(m_limelight_ty);
+      System.out.print("\n");
+      System.out.print(m_limelight_tz);
+      System.out.print("\n");
+      System.out.print("............... "+"\n");
+      m_timer.reset();
     }
-    else if(m_leftStick.getZ()!=0)
-    {
-      double factor = 0.6;
-      m_myRobot.tankDrive(factor*m_leftStick.getZ(), -factor*m_leftStick.getZ());
-    }
-    if(m_leftStick.getRawButton(1))
-    {
-      m_roller.set(0.05);
-    }
-    else{
-      m_roller.set(0); 
-    }
-
-    if(m_leftStick.getRawButton(3)){
-      m_intake.set(ControlMode.PercentOutput, 0.4);
-    }else if (m_leftStick.getRawButton(4)){
-      m_intake.set(ControlMode.PercentOutput, -0.4);
-    }else{
-      m_intake.set(ControlMode.PercentOutput, 0);
-    }
-    if (m_leftStick.getRawButton(8)){
-      m_climber.set(ControlMode.PercentOutput, 0.2);
-    }else if (m_leftStick.getRawButton(9)){
-      m_climber.set(ControlMode.PercentOutput, -0.2);
-    }else{
-      m_climber.set(ControlMode.PercentOutput, 0);
-    }
-
-
-    if(m_leftStick.getRawButton(2))
-    {
-      m_transporter.set(ControlMode.PercentOutput, 0.75);
-      m_lowerwheel.set(-0.25);
-      m_upperwheel.set(0.3);
-    }
-    else{
-      m_transporter.set(ControlMode.PercentOutput, 0); 
-      m_lowerwheel.set(0);
-      m_upperwheel.set(0);
-    }
+    
 
 
   }
@@ -145,6 +103,6 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void autonomousPeriodic() {
-   
+
   }
 }
