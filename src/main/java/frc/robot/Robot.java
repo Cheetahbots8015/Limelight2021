@@ -60,17 +60,14 @@ public class Robot extends TimedRobot {
   private double m_limelight_tx;
   private double m_limelight_ty;
   private double m_limelight_tz;
-  private double m_limelight_tx0;
-  private double m_limelight_ty0;
-  private float KpAim = -0.1f;
-  private float KpDistance = -0.1f;
-  private float min_aim_command = 0.05f;
-  private float right_command=0.0f;
-  private float left_command=0.0f;
+  private float KpAim = -0.004f;
+  private float KpDistance = -0.004f;
+  private float right_command;
+  private float left_command;
+  private float min_aim_command = 0.0f;
   private float angle_of_limelight = 15.0f; 
   private float height_of_limelight = 45.0f;
   private float height_of_target = 66.0f;
-  private float distance_stop = -10000000000f;
   
     /* The orchestra object that holds all the instruments */
   Orchestra _orchestra;
@@ -268,59 +265,51 @@ public class Robot extends TimedRobot {
       m_limelight_target = m_ntwktbl.getEntry("tv").getDouble(0);
       m_limelight_tx = m_ntwktbl.getEntry("tx").getDouble(0);
       m_limelight_ty = m_ntwktbl.getEntry("ty").getDouble(0);
-      m_limelight_tx0 = m_ntwktbl.getEntry("tx0").getDouble(0);
-      m_limelight_ty0 = m_ntwktbl.getEntry("ty0").getDouble(0);
       m_limelight_tz = m_ntwktbl.getEntry("tz").getDouble(0);
 
       if (m_limelight_target != 1.0){
-        float steering_adjust = 0.3f;
+        float steering_adjust = 0.2f;
 
         float left_command = steering_adjust;
         float right_command = -steering_adjust;
 
-        //m_myRobot.tankDrive(left_command,right_command);
+        m_myRobot.tankDrive(left_command,right_command);
 
         m_timer.reset();
       }
 
-      else{
-        float distance = (float) ((height_of_target - height_of_limelight) / Math.tan(Math.toRadians(m_limelight_ty + angle_of_limelight)));
+      else if (m_limelight_target == 1.0){
+        float vertical_distance=(float)((height_of_target-height_of_limelight)/Math.tan(Math.toRadians(m_limelight_ty+angle_of_limelight)));
+        float limelight_tx_distance=(float)(Math.tan(Math.toRadians(m_limelight_tx))*vertical_distance);
 
-        System.out.print(distance + "\n" );
+        double heading_error=-limelight_tx_distance;
+        double distance_error=-vertical_distance;
+        double steering_adjust=0.0f;
 
-        if (distance < distance_stop){
-          m_myRobot.tankDrive(0,0);
-
-          m_timer.reset();
-          }
-        else if (distance > distance_stop){
-       
-          double heading_error = -m_limelight_tx0;
-          double distance_error = -m_limelight_ty0;
-          double steering_adjust = 0.0f;
-  
-          if (m_limelight_tx0 > 1.0){
-            steering_adjust = KpAim * heading_error - min_aim_command;
-            }
-          else if (m_limelight_tx0 < 1.0){
-            steering_adjust= KpAim * heading_error + min_aim_command;
-            }
-          double distance_adjust = KpDistance * distance_error;
-  
-          left_command = (float) (steering_adjust + distance_adjust);
-          right_command = (float) (-steering_adjust + distance_adjust);
-  
-          System.out.print("left and right and distance" + "\n");
-          System.out.print(left_command);
-          System.out.print("\n");
-          System.out.print(right_command);
-          System.out.print("\n");
-          System.out.print(distance);
-          System.out.print("\n");
-          m_timer. reset();
-    
-          //m_myRobot.tankDrive( left_command,  right_command);
+        if(m_limelight_tx>1.0){
+        steering_adjust = KpAim * heading_error + min_aim_command;
         }
+        else if(m_limelight_tx< 1.0){
+        steering_adjust = KpAim * heading_error + min_aim_command;
+        }
+
+        double distance_adjust = KpDistance * distance_error;
+
+        left_command = (float)(steering_adjust + distance_adjust);
+        right_command = (float)(-steering_adjust + distance_adjust);
+
+        System.out.print("left andr right distance "+"\n");
+        System.out.print(left_command);
+        System.out.print("\n");
+        System.out.print(right_command);
+        System.out.print("\n");
+        System.out.print(vertical_distance);
+        System.out.print("\n");
+        System.out.print(limelight_tx_distance);
+        System.out.print("\n");
+
+        m_myRobot.tankDrive(left_command,right_command);
+
       }
     }
   }
