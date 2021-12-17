@@ -59,76 +59,15 @@ public class Robot extends TimedRobot {
   private double m_limelight_target;
   private double m_limelight_tx;
   private double m_limelight_ty;
-  private double m_limelight_tz;
   private float KpAim = -0.004f;
   private float KpDistance = -0.004f;
   private float right_command;
   private float left_command;
-  private float min_aim_command = 0.0f;
+  private float min_aim_command = 0.05f;
   private float angle_of_limelight = 15.0f; 
   private float height_of_limelight = 45.0f;
-  private float height_of_target = 66.0f;
+  private float height_of_target = 74.0f;
   
-    /* The orchestra object that holds all the instruments */
-  Orchestra _orchestra;
-
-    /* Talon FXs to play music through.  
-    More complex music MIDIs will contain several tracks, requiring multiple instruments.  */
-    TalonFX [] _fxes =  { new TalonFX(18), new TalonFX(19) };
-
-    /* An array of songs that are available to be played, can you guess the song/artists? */
-  String[] _songs = new String[] {
-    "song1.chrp",
-    "song2.chrp",
-    "song3.chrp",
-    "song4.chrp",
-    "song5.chrp",
-    "song6.chrp",
-    "song7.chrp",
-    "song8.chrp",
-    "song9.chrp", /* the remaining songs play better with three or more FXs */
-  };
-
-    /* track which song is selected for play */
-  int _songSelection = 0;
-      /* overlapped actions */
-  int _timeToPlayLoops = 0;
-
-  int _lastButton = 0;
-  int _lastPOV = 0;
-  
-  int getButton() {
-    for (int i = 1; i < 9; ++i) {
-        if (m_leftStick.getRawButton(i)) {
-            return i;
-        }
-    }
-    return 0;
-}
-
-  void LoadMusicSelection(int offset)
-  {
-    /* increment song selection */
-    _songSelection += offset;
-    /* wrap song index in case it exceeds boundary */
-    if (_songSelection >= _songs.length) {
-        _songSelection = 0;
-    }
-    if (_songSelection < 0) {
-        _songSelection = _songs.length - 1;
-    }
-    /* load the chirp file */
-    _orchestra.loadMusic(_songs[_songSelection]); 
-
-    /* print to console */
-    System.out.println("Song selected is: " + _songs[_songSelection] + ".  Press left/right on d-pad to change.");
-    
-    /* schedule a play request, after a delay.  
-        This gives the Orchestra service time to parse chirp file.
-        If play() is called immedietely after, you may get an invalid action error code. */
-    _timeToPlayLoops = 10;
-  }
-
 
   @Override
   public void robotInit() {
@@ -158,26 +97,13 @@ public class Robot extends TimedRobot {
     m_leftStick = new Joystick(0);
     m_rightStick = new Joystick(1);
     
-    /* A list of TalonFX's that are to be used as instruments */
-    ArrayList<TalonFX> _instruments = new ArrayList<TalonFX>();
-      
-     /* Initialize the TalonFX's to be used */
-    for (int i = 0; i < _fxes.length; ++i) {
-        _instruments.add(_fxes[i]);
-    }
-    /* Create the orchestra with the TalonFX instruments */
-    _orchestra = new Orchestra(_instruments);
 
   }
   @Override
-  public void teleopInit() {
-      
-      /* load whatever file is selected */
-      LoadMusicSelection(0);
+  public void teleopInit() {  
   }
   @Override
   public void teleopPeriodic() {
-    _orchestra.play();
     if(m_leftStick.getY() > 0.1 || m_leftStick.getY() < -0.1)
     {
       double factor = 0.75;
@@ -223,34 +149,6 @@ public class Robot extends TimedRobot {
       m_lowerwheel.set(0);
       m_upperwheel.set(0);
     }
-    int currentPOV = m_leftStick.getPOV();
-
-      /* if song selection changed, auto-play it */
-      if (_timeToPlayLoops > 0) {
-        --_timeToPlayLoops;
-        if (_timeToPlayLoops == 0) {
-            /* scheduled play request */
-            System.out.println("Auto-playing song.");
-            _orchestra.play();
-        }
-    }
-
-      /* has POV/D-pad changed? */
-      if (_lastPOV != currentPOV) {
-        _lastPOV = currentPOV;
-
-      switch (currentPOV) {
-        case 90:
-        /* increment song selection */
-          LoadMusicSelection(+1);
-          break;
-        case 270:
-          /* decrement song selection */
-          LoadMusicSelection(-1);
-          break;
-        }
-      }
-
   }
   
   @Override
@@ -265,7 +163,6 @@ public class Robot extends TimedRobot {
       m_limelight_target = m_ntwktbl.getEntry("tv").getDouble(0);
       m_limelight_tx = m_ntwktbl.getEntry("tx").getDouble(0);
       m_limelight_ty = m_ntwktbl.getEntry("ty").getDouble(0);
-      m_limelight_tz = m_ntwktbl.getEntry("tz").getDouble(0);
 
       if (m_limelight_target != 1.0){
         float steering_adjust = 0.2f;
@@ -273,25 +170,20 @@ public class Robot extends TimedRobot {
         float left_command = steering_adjust;
         float right_command = -steering_adjust;
 
-        m_myRobot.tankDrive(left_command,right_command);
+        //m_myRobot.tankDrive(left_command,right_command);
 
         m_timer.reset();
       }
 
       else if (m_limelight_target == 1.0){
-        float vertical_distance=(float)((height_of_target-height_of_limelight)/Math.tan(Math.toRadians(m_limelight_ty+angle_of_limelight)));
-        float limelight_tx_distance=(float)(Math.tan(Math.toRadians(m_limelight_tx))*vertical_distance);
+        float target_distance=(float)((height_of_target-height_of_limelight)/Math.tan(Math.toRadians(m_limelight_ty+angle_of_limelight)));//only work when the height of the target is a constant and under a certian height.
+        float limelight_tx_distance=(float)((Math.tan(Math.toRadians(m_limelight_tx))*target_distance)-14);
 
         double heading_error=-limelight_tx_distance;
-        double distance_error=-vertical_distance;
+        double distance_error=-target_distance;
         double steering_adjust=0.0f;
 
-        if(m_limelight_tx>1.0){
-        steering_adjust = KpAim * heading_error + min_aim_command;
-        }
-        else if(m_limelight_tx< 1.0){
-        steering_adjust = KpAim * heading_error + min_aim_command;
-        }
+        steering_adjust = KpAim * heading_error;
 
         double distance_adjust = KpDistance * distance_error;
 
@@ -303,13 +195,20 @@ public class Robot extends TimedRobot {
         System.out.print("\n");
         System.out.print(right_command);
         System.out.print("\n");
-        System.out.print(vertical_distance);
+        System.out.print("target distance and x distance "+"\n");
+        System.out.print(target_distance);
         System.out.print("\n");
         System.out.print(limelight_tx_distance);
         System.out.print("\n");
+        System.out.print("limelight_tx and ty" + "\n");
+        System.out.print(m_limelight_tx);
+        System.out.print("\n");
+        System.out.print(m_limelight_ty);
+        System.out.print("\n");
 
-        m_myRobot.tankDrive(left_command,right_command);
+        //m_myRobot.tankDrive(left_command,right_command);
 
+        m_timer.reset();
       }
     }
   }
